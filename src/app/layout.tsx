@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css"; // Ruta relativa corregida
+import "@/app/style/globals.css"; // Ruta estándar que no falla
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
