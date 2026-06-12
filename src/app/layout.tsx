@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Volvemos a los scripts originales que sí cargan el diseño */}
         <script src="https://cdn.tailwindcss.com"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -38,7 +40,6 @@ export default function RootLayout({
         `}</style>
       </head>
       <body className="antialiased min-h-screen flex flex-col">
-        {/* ENVOLVEMOS LA APP AQUÍ */}
         <StoreProvider>
           <Navbar />
           {children}
