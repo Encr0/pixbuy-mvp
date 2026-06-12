@@ -1,76 +1,79 @@
-import Image from "next/image";
+import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ShoppingCart, ShieldCheck, Zap, Monitor } from "lucide-react";
+import { Monitor, Gamepad2 } from "lucide-react";
+import BuyBox from "@/components/products/BuyBox";
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  // Simulamos la obtención de datos (En producción se reemplaza por Prisma: prisma.product.findUnique)
-  const product = {
-    id: params.id,
-    title: "Cyberpunk 2077",
-    description: "Una historia de acción y aventura en un mundo abierto ambientado en Night City, una megalópolis obsesionada con el poder, el glamour y la modificación corporal. Asumes el papel de V, un mercenario que busca un implante único que es la clave para la inmortalidad.",
-    coverImage: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200",
-    priceCLP: 25000,
-    priceUSD: 29.99,
-    platforms: ["Steam", "GOG"],
-    publisher: "CD PROJEKT RED"
-  };
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await prisma.product.findUnique({
+    where: { id: params.id },
+    include: {
+      requirements: true,
+      editions: true,
+      categories: true,
+    }
+  });
+
+  if (!product) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center text-white p-4">
+        <Gamepad2 className="w-24 h-24 text-gray-600 mb-4" />
+        <h1 className="text-3xl font-black mb-2">Juego no encontrado</h1>
+        <Link href="/" className="bg-[#FF6600] px-6 py-2 rounded font-bold text-white mt-4">Volver a la tienda</Link>
+      </main>
+    );
+  }
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-pixdark-light p-6 md:p-8 rounded-2xl border border-pixdark-lighter">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         
-        {/* Imagen del Producto */}
-        <div className="relative rounded-xl overflow-hidden aspect-video md:aspect-square bg-pixdark">
-          <img 
-            src={product.coverImage} 
-            alt={product.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Detalles e Información de Compra */}
-        <div className="flex flex-col justify-center">
-          <div className="flex gap-2 mb-4">
-            {product.platforms.map(platform => (
-              <span key={platform} className="bg-pixdark border border-pixdark-lighter px-3 py-1 rounded text-sm font-bold flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-pixorange" /> {platform}
-              </span>
-            ))}
+        {/* COLUMNA IZQUIERDA: Arte y Requisitos (Estática) */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1e1e1e] aspect-video relative">
+            <img src={product.coverImage} alt={product.title} className="w-full h-full object-cover" />
           </div>
 
-          <h1 className="text-4xl font-black mb-2">{product.title}</h1>
-          <p className="text-gray-400 text-sm mb-6">Editor: <span className="text-white">{product.publisher}</span></p>
-          
-          <p className="text-gray-300 leading-relaxed mb-8">
-            {product.description}
-          </p>
+          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl p-6 md:p-8">
+            <h2 className="text-2xl font-bold text-white mb-4 border-b border-[#2a2a2a] pb-2">Acerca del juego</h2>
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line">{product.description}</p>
+          </div>
 
-          <div className="bg-pixdark border border-pixdark-lighter rounded-xl p-6 mb-8">
-            <div className="flex justify-between items-end mb-6">
-              <div>
-                <span className="text-sm text-gray-500 block mb-1">Precio Final</span>
-                <span className="text-4xl font-black text-white">${product.priceCLP.toLocaleString('es-CL')}</span>
-                <span className="text-sm text-gray-400 ml-3">USD {product.priceUSD}</span>
+          {product.requirements && (
+            <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-6 border-b border-[#2a2a2a] pb-2">
+                <Monitor className="text-[#FF6600]" />
+                <h2 className="text-2xl font-bold text-white">Requisitos del Sistema (PC)</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-[#121212] p-4 rounded border border-[#2a2a2a]">
+                  <h3 className="text-[#FF6600] font-bold mb-3">Mínimos</h3>
+                  <ul className="text-sm text-gray-400 space-y-2">
+                    <li><strong className="text-gray-300">SO:</strong> {product.requirements.minOS}</li>
+                    <li><strong className="text-gray-300">Procesador:</strong> {product.requirements.minCpu}</li>
+                    <li><strong className="text-gray-300">Memoria:</strong> {product.requirements.minRam}</li>
+                    <li><strong className="text-gray-300">Gráficos:</strong> {product.requirements.minGpu}</li>
+                  </ul>
+                </div>
+                <div className="bg-[#121212] p-4 rounded border border-[#2a2a2a]">
+                  <h3 className="text-green-500 font-bold mb-3">Recomendados</h3>
+                  <ul className="text-sm text-gray-400 space-y-2">
+                    <li><strong className="text-gray-300">SO:</strong> {product.requirements.recOS}</li>
+                    <li><strong className="text-gray-300">Procesador:</strong> {product.requirements.recCpu}</li>
+                    <li><strong className="text-gray-300">Memoria:</strong> {product.requirements.recRam}</li>
+                    <li><strong className="text-gray-300">Gráficos:</strong> {product.requirements.recGpu}</li>
+                  </ul>
+                </div>
               </div>
             </div>
-
-            <button className="w-full bg-pixorange hover:bg-pixorange-hover text-white font-bold py-4 rounded-xl flex justify-center items-center gap-3 transition-colors text-lg">
-              <ShoppingCart className="w-6 h-6" />
-              Añadir al Carrito
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-400">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-pixorange" />
-              <span>Entrega digital instantánea</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-pixorange" />
-              <span>Clave 100% original</span>
-            </div>
-          </div>
+          )}
         </div>
+
+        {/* COLUMNA DERECHA: La Caja de Compra Dinámica */}
+        <div className="space-y-6">
+          <BuyBox product={product} />
+        </div>
+
       </div>
     </main>
   );

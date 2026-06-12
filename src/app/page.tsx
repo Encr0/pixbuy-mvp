@@ -1,99 +1,108 @@
-import Image from "next/image";
+import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, Gamepad2 } from "lucide-react";
 
-// Mock de datos para el MVP (En la Fase 3 lo conectaremos a Prisma)
-const mockProducts = [
-  {
-    id: "1",
-    title: "Cyberpunk 2077",
-    coverImage: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=600",
-    priceCLP: 25000,
-    priceUSD: 29.99,
-    platforms: ["Steam", "Epic"],
-  },
-  {
-    id: "2",
-    title: "Elden Ring",
-    coverImage: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&q=80&w=600",
-    priceCLP: 35000,
-    priceUSD: 39.99,
-    platforms: ["Steam"],
-  },
-  {
-    id: "3",
-    title: "EA Sports FC 24",
-    coverImage: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=600",
-    priceCLP: 45000,
-    priceUSD: 49.99,
-    platforms: ["PSN", "Xbox", "Steam"],
-  }
-];
+export default async function HomePage() {
 
-export default function Home() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: 'desc' },
+    take: 12 
+  });
+
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
       
-      {/* Hero Section */}
-      <div className="relative rounded-2xl overflow-hidden bg-pixdark-light border border-pixdark-lighter p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
-        <div className="z-10 relative max-w-lg">
-          <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">
-            Desbloquea tu próximo juego en <span className="text-pixorange">segundos</span>.
+      {/* SECCIÓN HERO (El cartel principal) */}
+      <div className="bg-gradient-to-r from-[#FF6600]/20 to-[#121212] border border-[#FF6600]/30 rounded-2xl p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
+            Desbloquea tu próximo <span className="text-[#FF6600]">juego</span> en segundos.
           </h1>
-          <p className="text-gray-400 mb-8 text-lg">
+          <p className="text-gray-400 text-lg md:text-xl mb-8">
             Claves originales, entrega instantánea y los mejores precios para la comunidad gamer en Chile y el mundo.
           </p>
-          <button className="bg-pixorange hover:bg-pixorange-hover text-white font-bold py-3 px-8 rounded-full transition-colors w-full sm:w-auto">
-            Ver Ofertas
-          </button>
+          <div className="relative max-w-md">
+            <input 
+              type="text" 
+              placeholder="Buscar juegos, tarjetas de regalo..." 
+              className="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-full py-3 px-6 pl-12 text-white focus:outline-none focus:border-[#FF6600] transition-colors"
+            />
+            <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
+          </div>
         </div>
-        <div className="mt-8 md:mt-0 relative w-full md:w-1/2 h-64 md:h-80">
-           {/* Decorative abstract gamer element / image placeholder */}
-           <div className="absolute inset-0 bg-gradient-to-tr from-pixorange/20 to-transparent rounded-xl border border-pixorange/30 shadow-[0_0_50px_rgba(255,102,0,0.2)]"></div>
+        <div className="hidden md:flex opacity-80">
+          <Gamepad2 className="w-64 h-64 text-[#FF6600]/20" />
         </div>
       </div>
 
-      {/* Catalog Section */}
-      <div className="flex justify-between items-end mb-6">
-        <h2 className="text-2xl font-bold border-l-4 border-pixorange pl-3">Juegos Destacados</h2>
+      {/* TÍTULO DE LA VITRINA */}
+      <div className="flex items-center justify-between mb-8 border-b border-[#2a2a2a] pb-4">
+        <h2 className="text-2xl md:text-3xl font-black text-white">Últimos Lanzamientos</h2>
+        <Link href="/catalogo" className="text-[#FF6600] font-bold hover:underline">
+          Ver todos
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {mockProducts.map((game) => (
-          <div key={game.id} className="bg-pixdark-light rounded-xl border border-pixdark-lighter overflow-hidden group hover:border-pixorange transition-colors flex flex-col">
-            <div className="relative h-48 w-full overflow-hidden bg-pixdark">
-              <img 
-                src={game.coverImage} 
-                alt={game.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100"
-              />
-              <div className="absolute top-2 right-2 flex gap-1">
-                {game.platforms.map(p => (
-                  <span key={p} className="bg-black/70 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded text-white">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            <div className="p-4 flex flex-col flex-1">
-              <Link href={`/product/${game.id}`} className="hover:text-pixorange transition-colors">
-                <h3 className="font-bold text-lg mb-1 truncate">{game.title}</h3>
+      {/* CUADRÍCULA DINÁMICA DE JUEGOS */}
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <div key={product.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl overflow-hidden hover:border-[#FF6600] transition-all group hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#FF6600]/10 flex flex-col">
+              
+              {/* Imagen (Clicable) */}
+              <Link href={`/product/${product.id}`} className="aspect-[3/4] relative overflow-hidden block">
+                <img 
+                  src={product.coverImage} 
+                  alt={product.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur text-white text-xs font-bold px-2 py-1 rounded border border-[#2a2a2a]">
+                  {product.platforms[0]} {/* Muestra la primera plataforma, ej: Steam */}
+                </div>
               </Link>
               
-              <div className="mt-auto pt-4 flex items-center justify-between">
+              {/* Info del Juego */}
+              <div className="p-5 flex flex-col flex-1 justify-between">
                 <div>
-                  <span className="text-xl font-black text-white">${game.priceCLP.toLocaleString('es-CL')}</span>
-                  <span className="text-xs text-gray-500 block">USD {game.priceUSD}</span>
+                  <Link href={`/product/${product.id}`}>
+                    <h3 className="font-bold text-white text-lg line-clamp-1 hover:text-[#FF6600] transition-colors mb-1">
+                      {product.title}
+                    </h3>
+                  </Link>
+                  <p className="text-gray-400 text-xs mb-4 line-clamp-1">
+                    {product.publisher || "Digital"}
+                  </p>
                 </div>
-                <button className="bg-pixdark border border-pixdark-lighter hover:bg-pixorange hover:border-pixorange text-white p-2 rounded-lg transition-colors">
-                  <ShoppingCart className="w-5 h-5" />
-                </button>
+                
+                {/* Precio y Botón */}
+                <div className="flex items-end justify-between mt-auto">
+                  <div>
+                    <p className="text-xs text-gray-500 line-through mb-0.5">
+                      ${(product.priceCLP * 1.3).toLocaleString('es-CL')}
+                    </p>
+                    <span className="font-black text-white text-xl">
+                      ${product.priceCLP.toLocaleString('es-CL')}
+                    </span>
+                  </div>
+                  <button className="bg-[#2a2a2a] hover:bg-[#FF6600] p-3 rounded-lg transition-colors text-white">
+                    <ShoppingCart className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        /* MENSAJE SI LA BASE DE DATOS ESTÁ VACÍA */
+        <div className="text-center py-20 bg-[#1e1e1e] rounded-xl border border-[#2a2a2a]">
+          <Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-400">El catálogo está vacío</h2>
+          <p className="text-gray-500 mt-2">Visita /api/seed para inyectar juegos de prueba.</p>
+        </div>
+      )}
+
     </main>
   );
 }

@@ -5,8 +5,12 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Asegúrate de mantener esto si usas Neon
 }
 
+// -----------------------------------------------------------------------------
+// 1. USUARIOS Y SEGURIDAD
+// -----------------------------------------------------------------------------
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -14,10 +18,11 @@ model User {
   emailVerified DateTime?
   image         String?
   phone         String?   @unique
-  password      String?   // Para login manual
+  password      String?
   role          Role      @default(USER)
   orders        Order[]
   tickets       Ticket[]
+  reviews       Review[]  // NUEVO: El usuario ahora puede dejar reseñas
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -27,30 +32,94 @@ enum Role {
   ADMIN
 }
 
-model Product {
-  id          String      @id @default(cuid())
-  title       String
-  description String
-  coverImage  String
-  priceCLP    Int
-  priceUSD    Float
-  platforms   String[]    // Ej: ["Steam", "Epic", "PSN"]
-  publisher   String?
-  isActive    Boolean     @default(true)
-  keys        GameKey[]
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+// -----------------------------------------------------------------------------
+// 2. CATÁLOGO Y PRODUCTOS
+// -----------------------------------------------------------------------------
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique // Ej: "Acción", "RPG", "Deportes"
+  products  Product[] // Relación muchos a muchos con productos
 }
 
+model Product {
+  id            String              @id @default(cuid())
+  title         String
+  description   String
+  coverImage    String
+  priceCLP      Int                 // Precio Base (Standard)
+  priceUSD      Float               // Precio Base USD
+  platforms     String[]
+  publisher     String?
+  isActive      Boolean             @default(true)
+  
+  // NUEVAS RELACIONES
+  categories    Category[]
+  requirements  SystemRequirement?  // Un producto puede tener 1 set de requisitos
+  reviews       Review[]            // Un producto tiene muchas reseñas
+  editions      ProductEdition[]    // Standard, Deluxe, Ultimate...
+  
+  keys          GameKey[]
+  orderItems    OrderItem[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+// NUEVO: Requisitos del sistema para juegos de PC
+model SystemRequirement {
+  id          String   @id @default(cuid())
+  productId   String   @unique
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  minOS       String?
+  minCpu      String?
+  minRam      String?
+  minGpu      String?
+  minStorage  String?
+
+  recOS       String?
+  recCpu      String?
+  recRam      String?
+  recGpu      String?
+  recStorage  String?
+}
+
+// NUEVO: Ediciones de un juego (Para cobrar más por la versión Deluxe)
+model ProductEdition {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String    // Ej: "Deluxe Edition"
+  bonus       String?   // Ej: "Incluye pase de temporada"
+  priceCLP    Int       // Precio específico de esta edición
+  priceUSD    Float
+  keys        GameKey[] // Las claves ahora pueden pertenecer a una edición específica
+}
+
+// NUEVO: Sistema de Calificaciones
+model Review {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating      Int      // Del 1 al 5
+  comment     String?
+  createdAt   DateTime @default(now())
+}
+
+// -----------------------------------------------------------------------------
+// 3. INVENTARIO Y VENTAS
+// -----------------------------------------------------------------------------
 model GameKey {
-  id        String    @id @default(cuid())
-  keyString String    @unique // La clave real, ej: AAAA-BBBB-CCCC
-  productId String
-  product   Product   @relation(fields: [productId], references: [id])
-  status    KeyStatus @default(AVAILABLE)
-  orderId   String?   // Se asigna cuando se vende
-  order     Order?    @relation(fields: [orderId], references: [id])
+  id          String          @id @default(cuid())
+  keyString   String          @unique
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id])
+  editionId   String?         // NUEVO: Opcional, por si la clave es de la versión Deluxe
+  edition     ProductEdition? @relation(fields: [editionId], references: [id])
+  status      KeyStatus       @default(AVAILABLE)
+  orderId     String?
+  order       Order?          @relation(fields: [orderId], references: [id])
 }
 
 enum KeyStatus {
@@ -59,17 +128,17 @@ enum KeyStatus {
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  totalCLP  Int
-  totalUSD  Float
-  status    OrderStatus @default(PENDING)
-  payment   String      // "Webpay" o "PayPal"
-  items     OrderItem[]
-  gameKeys  GameKey[]   // Las claves entregadas en esta orden
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  totalCLP    Int
+  totalUSD    Float
+  status      OrderStatus @default(PENDING)
+  payment     String
+  items       OrderItem[]
+  gameKeys    GameKey[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 enum OrderStatus {
@@ -79,23 +148,26 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  price     Float   // Precio al momento de la compra
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id])
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  quantity    Int
+  price       Float
 }
 
+// -----------------------------------------------------------------------------
+// 4. SOPORTE TÉCNICO
+// -----------------------------------------------------------------------------
 model Ticket {
-  id        String       @id @default(cuid())
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
-  subject   String
-  message   String
-  status    TicketStatus @default(OPEN)
-  createdAt DateTime     @default(now())
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  subject     String
+  message     String
+  status      TicketStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
 }
 
 enum TicketStatus {
