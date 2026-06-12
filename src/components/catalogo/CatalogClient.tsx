@@ -119,7 +119,7 @@ export default function CatalogClient({ products, categories }: { products: any[
         {searchQuery && (
           <div className="mb-6 bg-pixorange/10 border border-[#FF6600] rounded-lg p-4 flex justify-between items-center">
             <span className="text-gray-300">
-              Resultados para: <strong className="text-white text-lg ml-1">"{searchQuery}"</strong>
+              Resultados para: <strong className="text-white text-lg ml-1">&quot;{searchQuery}&quot;</strong>
             </span>
           </div>
         )}
