@@ -18,6 +18,7 @@ export default function InteractiveButtons({ product }: Props) {
   const handleCart = () => {
     addToCart({
       id: product.id,
+      productId: product.id,
       title: product.title,
       price: product.priceCLP,
       image: product.coverImage,
