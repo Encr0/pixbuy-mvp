@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Search, ShoppingCart, Gamepad2 } from "lucide-react";
