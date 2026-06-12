@@ -48,8 +48,12 @@ export default function CheckoutPage() {
       // ¡El pago fue exitoso! Vaciamos el carrito visual
       clearCart();
       
+      // NUEVO: Refrescamos la memoria del navegador antes de viajar
+      router.refresh(); 
+      
       // Lo enviamos a su panel de control para que vea su compra
       router.push("/dashboard");
+
 
     } catch (err) {
       setError("Hubo un problema procesando tu transacción. Intenta nuevamente.");

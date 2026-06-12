@@ -1,20 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, Filter, Gamepad2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function CatalogClient({ products, categories }: { products: any[], categories: any[] }) {
-  // Estados para recordar qué está buscando el usuario
-  const [searchTerm, setSearchTerm] = useState("");
+
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
+  
+  // 1. Inicializamos el buscador interno con lo que venga de la URL
+  const [searchTerm, setSearchTerm] = useState(searchQuery);
   const [selectedPlatform, setSelectedPlatform] = useState("Todas");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
+
+  // 2. MAGIA: Si el usuario busca desde el Navbar mientras YA está en el catálogo, 
+  // esto actualiza la caja de búsqueda interna automáticamente.
+  useEffect(() => {
+    setSearchTerm(searchQuery);
+  }, [searchQuery]);
 
   const platforms = ["Todas", "Steam", "Epic Games", "PSN", "Xbox", "Nintendo"];
 
   // Motor de filtrado en tiempo real
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
+    // Busca coincidencias en el título o en la descripción
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+                          
     const matchesPlatform = selectedPlatform === "Todas" || product.platforms.includes(selectedPlatform);
     const matchesCategory = selectedCategory === "Todas" || product.categories.some((c: any) => c.name === selectedCategory);
     
@@ -100,6 +114,16 @@ export default function CatalogClient({ products, categories }: { products: any[
 
       {/* CUADRÍCULA DE RESULTADOS */}
       <div className="flex-1">
+        
+        {/* Aviso de Búsqueda Activa */}
+        {searchQuery && (
+          <div className="mb-6 bg-pixorange/10 border border-[#FF6600] rounded-lg p-4 flex justify-between items-center">
+            <span className="text-gray-300">
+              Resultados para: <strong className="text-white text-lg ml-1">"{searchQuery}"</strong>
+            </span>
+          </div>
+        )}
+
         <div className="mb-6 flex justify-between items-end">
           <h2 className="text-2xl font-black text-white">
             Explorar Catálogo

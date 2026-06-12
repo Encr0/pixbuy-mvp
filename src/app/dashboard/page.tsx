@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -66,7 +67,7 @@ export default async function DashboardPage() {
               {/* Recorremos las órdenes y extraemos los juegos */}
               {userOrders.flatMap(order => order.items).map((item) => {
                 // Generamos una clave falsa única para el MVP combinando "PIX" y el ID del item
-                const simulatedKey = `PIX-${item.id.slice(0,4).toUpperCase()}-${item.productId.slice(0,4).toUpperCase()}-X92B`;
+                  const actualKey = item.assignedKey || "CLAVE-PENDIENTE (Contacta a soporte)";
 
                 return (
                   <div key={item.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl p-4 flex flex-col transition-colors hover:border-gray-600">
@@ -83,7 +84,7 @@ export default async function DashboardPage() {
                     </div>
                     
                     {/* Aquí usamos nuestro nuevo componente interactivo */}
-                    <RevealKey gameName={item.product.title} fakeKey={simulatedKey} />
+                    <RevealKey gameName={item.product.title} fakeKey={actualKey} />
                   </div>
                 );
               })}

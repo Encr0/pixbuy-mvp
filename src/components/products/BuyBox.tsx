@@ -42,14 +42,28 @@ export default function BuyBox({ product }: { product: any }) {
       <h1 className="text-3xl font-black text-white leading-tight mb-2">{product.title}</h1>
       
       {/* Reseñas y Publisher */}
+      {/* Reseñas Calculadas Matemáticamente */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-1 text-yellow-500">
-          <Star className="w-5 h-5 fill-current" />
-          <Star className="w-5 h-5 fill-current" />
-          <Star className="w-5 h-5 fill-current" />
-          <Star className="w-5 h-5 fill-current" />
-          <Star className="w-5 h-5 fill-current text-gray-600" />
-          <span className="text-gray-400 text-sm ml-2">(128 reseñas)</span>
+        <div className="flex items-center gap-1">
+          <div className="flex text-yellow-500">
+            {[1, 2, 3, 4, 5].map((star) => {
+              // Calculamos el promedio sumando todas las calificaciones y dividiéndolas por la cantidad de reseñas
+              const reviewCount = product.reviews?.length || 0;
+              const avgRating = reviewCount > 0 
+                ? product.reviews.reduce((acc: number, rev: any) => acc + rev.rating, 0) / reviewCount 
+                : 0;
+                
+              return (
+                <Star 
+                  key={star} 
+                  className={`w-5 h-5 ${star <= Math.round(avgRating) ? "fill-current" : "text-gray-600"}`} 
+                />
+              );
+            })}
+          </div>
+          <span className="text-gray-400 text-sm ml-2">
+            ({product.reviews?.length || 0} reseñas)
+          </span>
         </div>
         <span className="text-xs font-bold bg-[#2a2a2a] text-gray-300 px-3 py-1 rounded-full">
           {product.publisher || "Digital"}
@@ -115,18 +129,22 @@ export default function BuyBox({ product }: { product: any }) {
         
         {/* Botones Interactivos Integrados */}
         <div className="flex gap-3">
-          <button 
-            onClick={handleCart}
-            disabled={inCart}
-            className={`flex-1 flex items-center justify-center gap-2 font-black text-lg py-4 rounded transition-colors ${
-              inCart ? "bg-green-500 text-white cursor-default" 
-                : added ? "bg-green-500 text-white" 
-                : "bg-[#FF6600] hover:bg-[#e55c00] text-white"
-            }`}
-          >
-            <ShoppingCart className="w-6 h-6" />
-            {inCart ? "En el carrito" : added ? "¡Añadido!" : "Añadir al Carrito"}
-          </button>
+          {product._count?.keys > 0 ? (
+            <button 
+              onClick={handleCart}
+              className={`flex-1 flex items-center justify-center gap-2 font-black text-lg py-4 rounded transition-colors ${
+                added ? "bg-green-500 text-white" : "bg-[#FF6600] hover:bg-[#e55c00] text-white"
+              }`}
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {added ? "¡Añadido!" : inCart ? "Añadir otra copia" : "Añadir al Carrito"}
+            </button>
+
+            ) : (
+              <button disabled className="flex-1 flex items-center justify-center gap-2 bg-[#2a2a2a] text-gray-500 font-black text-lg py-4 rounded cursor-not-allowed">
+                Agotado Temporalmente
+              </button>
+            )}
 
           <button 
             onClick={() => toggleWishlist(product.id)}

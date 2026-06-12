@@ -6,12 +6,12 @@ export default async function CatalogoPage() {
   const products = await prisma.product.findMany({
     where: { isActive: true },
     include: {
-      categories: true, // Incluimos las categorías para que los filtros funcionen
+      categories: true, 
     },
     orderBy: { createdAt: 'desc' }
   });
 
-  // 2. Buscamos TODAS las categorías que existen para armar el menú lateral
+  // 2. Buscamos TODAS las categorías
   const categories = await prisma.category.findMany({
     orderBy: { name: 'asc' }
   });
@@ -25,7 +25,7 @@ export default async function CatalogoPage() {
         </p>
       </div>
 
-      {/* Aquí inyectamos el componente inteligente pasándole los datos reales */}
+      {/* Aquí inyectamos el componente pasándole los datos reales completos */}
       <CatalogClient products={products} categories={categories} />
     </main>
   );
