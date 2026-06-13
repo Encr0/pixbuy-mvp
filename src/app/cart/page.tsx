@@ -3,14 +3,17 @@
 import { useStore } from "@/context/StoreProvider";
 import Link from "next/link";
 import { ShoppingCart, Trash2, Minus, Plus } from "lucide-react";
+import { useMemo } from "react"; // 1. IMPORTANTE: Importa useMemo
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useStore();
 
   // Multiplicamos el precio por la cantidad de copias de cada juego
-  const totalCLP = cart.reduce((acumulador, item) => {
-  return acumulador + (item.price * item.quantity);
-}, 0);
+  const totalCLP = useMemo(() => {
+    return cart.reduce((acumulador, item) => {
+      return acumulador + (item.price * item.quantity);
+    }, 0);
+  }, [cart]);
 
   if (cart.length === 0) {
     return (
