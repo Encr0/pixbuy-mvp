@@ -1,9 +1,43 @@
+import { Metadata } from "next";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import BuyBox from "@/components/products/BuyBox";
 import ReviewSection from "@/components/products/ReviewSection";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await prisma.product.findUnique({
+    where: { id: params.id }
+  });
+
+  if (!product) {
+    return { title: "Juego no encontrado | Pixbuy" };
+  }
+
+  return {
+    title: `${product.title} | Pixbuy`,
+    description: product.description.substring(0, 160) + "...", // Cortamos a 160 caracteres (regla de oro de Google)
+    openGraph: {
+      title: `${product.title} | Comprar Game Key`,
+      description: `Compra ${product.title} por solo $${product.priceCLP.toLocaleString('es-CL')} en Pixbuy.`,
+      images: [
+        {
+          url: product.coverImage,
+          width: 800,
+          height: 600,
+          alt: product.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.title} | Pixbuy`,
+      description: `Consigue ${product.title} por $${product.priceCLP.toLocaleString('es-CL')}. Entrega instantánea.`,
+      images: [product.coverImage],
+    },
+  };
+}
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

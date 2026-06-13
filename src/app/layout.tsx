@@ -5,8 +5,25 @@ import Footer from "@/components/layout/Footer";
 import { StoreProvider } from "@/context/StoreProvider";
 
 export const metadata: Metadata = {
-  title: "Pixbuy | Venta de Claves de Videojuegos",
-  description: "Compra claves de juegos para PC, PlayStation y Xbox al instante.",
+  title: "Pixbuy | Tu Tienda de Game Keys",
+  description: "Compra los mejores juegos de Steam, Epic Games, PlayStation y Xbox al mejor precio con entrega instantánea.",
+  openGraph: {
+    title: "Pixbuy | Tu Tienda de Game Keys",
+    description: "Juegos digitales al mejor precio. Entrega inmediata y pago seguro.",
+    url: "https://pixbuy.vercel.app", // Puedes cambiar esto por tu dominio real de Vercel
+    siteName: "Pixbuy",
+    images: [
+      {
+        // Imagen por defecto genial para cuando compartan la página de inicio
+        url: "https://lh3.googleusercontent.com/gg/AEir0wJajoXOl7PLPiahQ8ix3LfRRBjaF9d5UpemedJW-2XkSidN8e-qdj14OQJ1n7FV7-tKVTNRCLJFdg78cBnml3HCrjni30eIh_sgURwHorGU-71XAzlKZb4td_bQmGQ3YRZQ5JVxoPebRSE77fr4aFVQmZj4Opo12aymOnTTBfsyQmAFVMZGGJtl2lFftj-GdJmUEO17MneTsdf647te1Iu18cZwokHlzhkF_1pBWmCQtojra71MPLonWTB6pDE8bj4RDfUYiJPZtowa21_9fk8RqnefkhawtLS5_uo2ciHuk3xPyRHx-BojYzcVHADrDA01F4sChUZfyHIJdXwioW0=s1024-rj", 
+        width: 1200,
+        height: 630,
+        alt: "Pixbuy Portada",
+      },
+    ],
+    locale: "es_CL",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
