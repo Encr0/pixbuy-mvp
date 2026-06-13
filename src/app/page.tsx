@@ -21,7 +21,7 @@ export default async function HomePage() {
             Desbloquea tu próximo <span className="text-[#FF6600]">juego</span> en segundos.
           </h1>
           <p className="text-gray-400 text-lg md:text-xl mb-8">
-            Claves originales, entrega instantánea y los mejores precios para la comunidad gamer en Chile y el mundo.
+            Claves originales, entrega instantánea y los mejores precios para la comunidad gamer en Chile y el mundo. obten hasta 3% de pixPoints en cada compra, canjeables por descuentos y recompensas exclusivas.
           </p>
           <div className="relative max-w-md">
           </div>

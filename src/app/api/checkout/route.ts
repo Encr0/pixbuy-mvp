@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         });
       }
 
-      const pointsEarned = Math.floor(realTotal * 0.01);
+      const pointsEarned = Math.floor(realTotal * 0.03); // 3% de puntos por compra
 
       // Le sumamos los puntos a la billetera del usuario dentro de la misma transacción
       await tx.user.update({
