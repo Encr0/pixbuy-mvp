@@ -12,7 +12,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const totalCLP = cart.reduce((acc, item) => acc + item.price, 0);
+  const totalCLP = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   // Si alguien entra a /checkout con el carrito vacío
   if (cart.length === 0) {
@@ -82,10 +82,16 @@ export default function CheckoutPage() {
           <div className="space-y-4 mb-6">
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-sm">
-                <span className="text-gray-300 line-clamp-1 pr-4">{item.title}</span>
-                <span className="text-white font-bold whitespace-nowrap">${item.price.toLocaleString('es-CL')}</span>
-              </div>
-            ))}
+    <span className="text-gray-300 line-clamp-1 pr-4">
+      {/* AQUI AGREGAMOS LA CANTIDAD */}
+      {item.quantity}x {item.title}
+    </span>
+    {/* AQUI CALCULAMOS EL PRECIO TOTAL DE ESTE ITEM */}
+    <span className="text-white font-bold whitespace-nowrap">
+      ${(item.price * item.quantity).toLocaleString('es-CL')}
+    </span>
+  </div>
+))}
           </div>
           <div className="border-t border-[#2a2a2a] pt-4 flex justify-between items-end">
             <span className="text-gray-400 font-bold">Total a Pagar</span>

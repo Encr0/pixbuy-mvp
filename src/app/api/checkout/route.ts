@@ -11,21 +11,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    const { cart } = await req.json(); // Solo necesitamos el carrito, el total lo calculamos nosotros
+
+    // 1. RE-CALCULO DE SEGURIDAD: Buscamos el precio real de cada producto en tu BD
+    // Esto evita que un usuario modifique el precio desde el navegador
+    let realTotal = 0;
+    const productIds = cart.map((i: any) => i.productId);
+    const dbProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } }
+    });
+
+    for (const item of cart) {
+      const product = dbProducts.find(p => p.id === item.productId);
+      if (!product) throw new Error(`Producto ${item.title} no encontrado`);
+      realTotal += product.priceCLP * item.quantity;
+    }
+
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 
-    const { cart, totalCLP } = await req.json();
-
-    // Utilizamos una TRANSACCIÓN: Si algo falla a la mitad (ej. un juego se quedó sin stock), 
-    // se cancela TODO el carrito y no se cobra nada. ¡Máxima seguridad!
+    // 2. Ahora usamos 'realTotal' en lugar del total que venía del frontend
     const newOrder = await prisma.$transaction(async (tx) => {
-      
-      // 1. Creamos el recibo maestro primero
       const order = await tx.order.create({
         data: {
           userId: user.id,
-          totalCLP: totalCLP,
-          totalUSD: parseFloat((totalCLP / 900).toFixed(2)),
+          totalCLP: realTotal, // <--- PRECIO REAL DE BASE DE DATOS
+          totalUSD: parseFloat((realTotal / 900).toFixed(2)),
           status: "PAID",
           payment: "Pixbuy Wallet (Simulador)",
         }
@@ -66,7 +77,7 @@ export async function POST(req: Request) {
         });
       }
 
-      const pointsEarned = Math.floor(totalCLP * 0.01);
+      const pointsEarned = Math.floor(realTotal * 0.01);
 
       // Le sumamos los puntos a la billetera del usuario dentro de la misma transacción
       await tx.user.update({
