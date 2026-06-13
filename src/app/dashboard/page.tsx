@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import LogoutButton from "@/components/ui/LogoutButton";
 import RevealKey from "@/components/dashboard/RevealKey";
-import { Gamepad2, Receipt } from "lucide-react";
+import { Coins, Gamepad2, Key, Star, Receipt } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -15,25 +15,41 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // 1. Buscamos al usuario exacto
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email }
+  // 1. Buscamos al usuario incluyendo sus puntos
+  const dbUser = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      pixPoints: true,
+    }
   });
 
-  if (!user) redirect("/login");
+  if (!dbUser) redirect("/login");
 
-  // 2. Buscamos todas las compras de este usuario, INCLUYENDO los juegos que vienen adentro
+  // 2. Definimos explícitamente el tipo de objeto para TypeScript
+  const user: { id: string; name: string | null; email: string | null; pixPoints: number } = {
+    id: dbUser.id,
+    name: dbUser.name,
+    email: dbUser.email,
+    pixPoints: dbUser.pixPoints ?? 0,
+  };
+
+  // 2. Buscamos todas las compras de este usuario
   const userOrders = await prisma.order.findMany({
     where: { userId: user.id },
     include: {
       items: {
         include: {
-          product: true // Traemos la foto y el título del juego
+          product: true 
         }
       }
     },
-    orderBy: { createdAt: 'desc' } // Los más nuevos primero
+    orderBy: { createdAt: 'desc' }
   });
+
+  
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12">
@@ -43,6 +59,31 @@ export default async function DashboardPage() {
           <p className="text-gray-400">Bienvenido de vuelta, {session.user.name || session.user.email}</p>
         </div>
         <LogoutButton />
+      </div>
+
+      {/* --- TARJETAS DE ESTADO (PIXPOINTS + CUENTA) --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="bg-[#1e1e1e] border-2 border-[#FF6600]/30 p-6 rounded-xl flex items-center gap-4">
+           <Coins className="w-10 h-10 text-[#FF6600]" />
+           <div>
+             <p className="text-gray-400 text-sm font-bold uppercase">Mis PixPoints</p>
+             <h3 className="text-3xl font-black text-white">{user.pixPoints.toLocaleString('es-CL')}</h3>
+           </div>
+        </div>
+        <div className="bg-[#1e1e1e] border border-[#2a2a2a] p-6 rounded-xl flex items-center gap-4">
+           <Key className="w-10 h-10 text-blue-500" />
+           <div>
+             <p className="text-gray-400 text-sm font-bold uppercase">Juegos Activos</p>
+             <h3 className="text-3xl font-black text-white">{userOrders.flatMap(o => o.items).length}</h3>
+           </div>
+        </div>
+        <div className="bg-[#1e1e1e] border border-[#2a2a2a] p-6 rounded-xl flex items-center gap-4">
+           <Star className="w-10 h-10 text-purple-500" />
+           <div>
+             <p className="text-gray-400 text-sm font-bold uppercase">Rango</p>
+             <h3 className="text-3xl font-black text-white">Bronce</h3>
+           </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -64,35 +105,30 @@ export default async function DashboardPage() {
              </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Recorremos las órdenes y extraemos los juegos */}
               {userOrders.flatMap(order => order.items).map((item) => {
-                // Generamos una clave falsa única para el MVP combinando "PIX" y el ID del item
-                  const actualKey = item.assignedKey || "CLAVE-PENDIENTE (Contacta a soporte)";
-
-                return (
-                  <div key={item.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl p-4 flex flex-col transition-colors hover:border-gray-600">
-                    <div className="flex items-center gap-4 mb-2">
-                      <img 
-                        src={item.product.coverImage} 
-                        alt={item.product.title} 
-                        className="w-16 h-16 object-cover rounded shadow"
-                      />
-                      <div>
-                        <h3 className="font-bold text-white line-clamp-1">{item.product.title}</h3>
-                        <p className="text-xs text-gray-400">Entregado digitalmente</p>
+                  const actualKey = item.assignedKey || "CLAVE-PENDIENTE";
+                  return (
+                    <div key={item.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl p-4 flex flex-col transition-colors hover:border-gray-600">
+                      <div className="flex items-center gap-4 mb-2">
+                        <img 
+                          src={item.product.coverImage} 
+                          alt={item.product.title} 
+                          className="w-16 h-16 object-cover rounded shadow"
+                        />
+                        <div>
+                          <h3 className="font-bold text-white line-clamp-1">{item.product.title}</h3>
+                          <p className="text-xs text-gray-400">Entregado digitalmente</p>
+                        </div>
                       </div>
+                      <RevealKey gameName={item.product.title} fakeKey={actualKey} />
                     </div>
-                    
-                    {/* Aquí usamos nuestro nuevo componente interactivo */}
-                    <RevealKey gameName={item.product.title} fakeKey={actualKey} />
-                  </div>
-                );
+                  );
               })}
             </div>
           )}
         </div>
 
-        {/* COLUMNA DERECHA: Historial de Pagos y Cuenta */}
+        {/* COLUMNA DERECHA: Cuenta y Recibos */}
         <div className="space-y-6">
           <div className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
             <h2 className="text-xl font-bold text-white mb-4 border-b border-[#2a2a2a] pb-2">Mi Cuenta</h2>
@@ -131,7 +167,6 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-
       </div>
     </main>
   );

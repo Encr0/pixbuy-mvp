@@ -66,6 +66,18 @@ export async function POST(req: Request) {
         });
       }
 
+      const pointsEarned = Math.floor(totalCLP * 0.01);
+
+      // Le sumamos los puntos a la billetera del usuario dentro de la misma transacción
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
+          pixPoints: {
+            increment: pointsEarned
+          }
+        }
+      });
+
       return order;
     });
 
