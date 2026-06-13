@@ -24,12 +24,6 @@ export default async function HomePage() {
             Claves originales, entrega instantánea y los mejores precios para la comunidad gamer en Chile y el mundo.
           </p>
           <div className="relative max-w-md">
-            <input 
-              type="text" 
-              placeholder="Buscar juegos, tarjetas de regalo..." 
-              className="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-full py-3 px-6 pl-12 text-white focus:outline-none focus:border-[#FF6600] transition-colors"
-            />
-            <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
           </div>
         </div>
         <div className="hidden md:flex opacity-80">

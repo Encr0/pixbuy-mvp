@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 
-// 1. Agregamos "quantity" al tipo de dato
+// (Tus tipos CartItem y StoreContextType siguen exactamente igual)
 type CartItem = {
   id: string;
   productId: string;
@@ -16,7 +16,7 @@ type StoreContextType = {
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
   removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void; // Nueva función
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   wishlist: string[];
   toggleWishlist: (productId: string) => void;
@@ -29,12 +29,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
 
+  // 1. Efecto inicial: Cargar LocalStorage y sincronizar con Base de Datos
   useEffect(() => {
     setIsClient(true);
     const savedCart = localStorage.getItem("cart");
     const savedWishlist = localStorage.getItem("wishlist");
+    
     if (savedCart) setCart(JSON.parse(savedCart));
-    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+    
+    let localWishlist: string[] = [];
+    if (savedWishlist) {
+      localWishlist = JSON.parse(savedWishlist);
+      setWishlist(localWishlist);
+    }
+
+    // MAGIA DE NUBE: Le preguntamos a la API si hay juegos en la base de datos
+    fetch("/api/wishlist")
+      .then(res => res.ok ? res.json() : [])
+      .then(dbWishlist => {
+        if (dbWishlist.length > 0) {
+          // Fusionamos los locales con los de la base de datos sin duplicados
+          const mergedWishlist = Array.from(new Set([...localWishlist, ...dbWishlist]));
+          setWishlist(mergedWishlist);
+          localStorage.setItem("wishlist", JSON.stringify(mergedWishlist));
+        }
+      })
+      .catch(() => {}); // Ignoramos errores si no hay internet o sesión
   }, []);
 
   useEffect(() => {
@@ -44,40 +64,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [cart, wishlist, isClient]);
 
-  // 2. Si el juego ya está en el carrito, le sumamos 1 en lugar de ignorarlo
+  // (Tus funciones de carrito siguen igual)
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.productId === item.productId);
       if (existing) {
-        return prev.map((i) => 
-          i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i
-        );
+        return prev.map((i) => i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i);
       }
       return [...prev, { ...item, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.productId !== productId));
-  };
-
-  // 3. Función para los botones de + y - en el carrito visual
+  const removeFromCart = (productId: string) => setCart((prev) => prev.filter((item) => item.productId !== productId));
   const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
+    if (quantity <= 0) return removeFromCart(productId);
     setCart((prev) => prev.map((i) => i.productId === productId ? { ...i, quantity } : i));
   };
-
   const clearCart = () => setCart([]);
 
+  // 2. toggleWishlist ahora dispara la sincronización en segundo plano
   const toggleWishlist = (productId: string) => {
-    setWishlist((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+    setWishlist((prev) => {
+      const newWishlist = prev.includes(productId)
+        ? prev.filter((id) => id !== productId) // Si existe, lo quita
+        : [...prev, productId]; // Si no existe, lo agrega
+
+      // SINCRONIZACIÓN EN SEGUNDO PLANO
+      // Disparamos la petición a la API, pero NO esperamos a que termine.
+      // Así el usuario ve el cambio instantáneo, y el servidor guarda una copia en silencio.
+      fetch("/api/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      }).catch(() => {});
+
+      return newWishlist;
+    });
   };
 
   return (

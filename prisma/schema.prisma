@@ -25,6 +25,7 @@ model User {
   reviews       Review[]  // NUEVO: El usuario ahora puede dejar reseñas
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  wishlist      WishlistItem[]
 }
 
 enum Role {
@@ -51,6 +52,7 @@ model Product {
   platforms     String[]
   publisher     String?
   isActive      Boolean             @default(true)
+  wishlist      WishlistItem[]
   
   // NUEVAS RELACIONES
   categories    Category[]
@@ -174,4 +176,17 @@ model Ticket {
 enum TicketStatus {
   OPEN
   RESOLVED
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Esta regla evita que un usuario guarde el mismo juego 2 veces en la base de datos
+  @@unique([userId, productId])
 }
