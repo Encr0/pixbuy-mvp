@@ -75,7 +75,7 @@ export async function POST(req: Request) {
           pixPoints: {
             increment: pointsEarned
           }
-        }
+        } as any
       });
 
       return order;
