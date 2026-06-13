@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Search, ShoppingCart, Gamepad2 } from "lucide-react";
+import { Terminal, ShieldCheck, Sparkles, Zap, Wrench, User, Github } from "lucide-react";
 
 export default async function HomePage() {
 
@@ -16,20 +17,81 @@ export default async function HomePage() {
       
       {/* SECCIÓN HERO (El cartel principal) */}
       <div className="bg-gradient-to-r from-[#FF6600]/20 to-[#121212] border border-[#FF6600]/30 rounded-2xl p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
-        <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
-            Desbloquea tu próximo <span className="text-[#FF6600]">juego</span> en segundos.
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl mb-8">
-            Claves originales, entrega instantánea y los mejores precios para la comunidad gamer en Chile y el mundo. obten hasta 3% de pixPoints en cada compra, canjeables por descuentos y recompensas exclusivas.
-          </p>
-          <div className="relative max-w-md">
-          </div>
-        </div>
-        <div className="hidden md:flex opacity-80">
-          <Gamepad2 className="w-64 h-64 text-[#FF6600]/20" />
-        </div>
+  
+  <div className="max-w-2xl">
+    {/* Título */}
+    <div className="flex items-center gap-4 mb-6">
+      <Terminal className="w-10 h-10 md:w-14 md:h-14 text-[#FF6600]" />
+      <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+        LOGS: mes de junio 2026
+      </h1>
+    </div>
+
+    {/* Lista estructurada en lugar del <p> con <br/> */}
+    <ul className="space-y-4 mb-8 text-gray-300 text-lg md:text-xl">
+      <li className="flex items-start gap-3">
+        <ShieldCheck className="w-6 h-6 text-green-500 shrink-0 mt-1" />
+        <span>
+          <strong className="text-white">Seguridad & Auth:</strong> Base de datos protegida, contraseñas hasheadas, autenticación JWT y roles diferenciados (Admin/Cliente).
+        </span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
+        <span>
+          <strong className="text-white">Nuevos Sistemas:</strong> Panel de administración completo, carrito con persistencia en DB y pasarela de pago simulada.
+        </span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
+        <span>
+          <strong className="text-white">Interacción:</strong> Sistema de reseñas con moderación y búsqueda avanzada con filtros (plataforma, género, precio).
+        </span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <Zap className="w-6 h-6 text-yellow-400 shrink-0 mt-1" />
+        <span>
+          <strong className="text-white">Rendimiento:</strong> Optimización de consultas a la base de datos y uso de técnicas de caching.
+        </span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <Wrench className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
+        <span>
+          <strong className="text-white">Bug Fixes:</strong> Arreglo en el error de cálculo de precios; ahora los impuestos se muestran correctamente.
+        </span>
+      </li>
+    </ul>
+
+    {/* Firma */}
+    {/* Firma y Enlaces */}
+    <div className="mt-8 flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-[#FF6600] font-mono text-lg">
+        <User className="w-5 h-5" />
+        <span>Encr0 - lead developer</span>
       </div>
+      
+      {/* Reemplaza TU_USUARIO por tu nombre de usuario real en GitHub */}
+      <a 
+        href="https://github.com/Encr0" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-mono text-sm ml-7"
+      >
+        <Github className="w-4 h-4" />
+        <span>github.com/Encr0</span>
+      </a>
+    </div>
+  </div>
+
+  {/* Icono gigante de la derecha (Mantenido intacto) */}
+  <div className="hidden md:flex opacity-80 shrink-0 ml-8">
+    <Gamepad2 className="w-64 h-64 text-[#FF6600]/20" />
+  </div>
+  
+</div>
 
       {/* TÍTULO DE LA VITRINA */}
       <div className="flex items-center justify-between mb-8 border-b border-[#2a2a2a] pb-4">
