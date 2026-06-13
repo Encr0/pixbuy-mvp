@@ -8,7 +8,9 @@ export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useStore();
 
   // Multiplicamos el precio por la cantidad de copias de cada juego
-  const totalCLP = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const totalCLP = cart.reduce((acumulador, item) => {
+  return acumulador + (item.price * item.quantity);
+}, 0);
 
   if (cart.length === 0) {
     return (
