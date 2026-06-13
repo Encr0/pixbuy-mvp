@@ -8,6 +8,17 @@ import RevealKey from "@/components/dashboard/RevealKey";
 import { Coins, Gamepad2, Key, Star, Receipt } from "lucide-react";
 import Link from "next/link";
 
+const getRank = (points: number) => {
+  if (points >= 20000) return { name: "Gran Maestro", color: "text-red-500", glow: "shadow-[0_0_20px_rgba(239,68,68,0.5)] border-red-500/50" };
+  if (points >= 15000) return { name: "Diamante", color: "text-cyan-400", glow: "shadow-[0_0_15px_rgba(34,211,238,0.5)] border-cyan-400/50" };
+  if (points >= 10000) return { name: "Platino", color: "text-indigo-400", glow: "shadow-[0_0_10px_rgba(129,140,248,0.5)] border-indigo-400/50" };
+  if (points >= 5000) return { name: "Oro", color: "text-yellow-400", glow: "shadow-[0_0_8px_rgba(250,204,21,0.3)] border-yellow-400/30" };
+  if (points >= 2000) return { name: "Plata", color: "text-gray-300", glow: "border-gray-500" };
+  if (points >= 500) return { name: "Bronce", color: "text-orange-700", glow: "border-orange-700/30" };
+  return { name: "Hierro", color: "text-slate-500", glow: "border-slate-700" };
+};
+
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
@@ -49,7 +60,7 @@ export default async function DashboardPage() {
     orderBy: { createdAt: 'desc' }
   });
 
-  
+  const rank = getRank(user.pixPoints);
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12">
@@ -77,13 +88,17 @@ export default async function DashboardPage() {
              <h3 className="text-3xl font-black text-white">{userOrders.flatMap(o => o.items).length}</h3>
            </div>
         </div>
-        <div className="bg-[#1e1e1e] border border-[#2a2a2a] p-6 rounded-xl flex items-center gap-4">
-           <Star className="w-10 h-10 text-purple-500" />
-           <div>
-             <p className="text-gray-400 text-sm font-bold uppercase">Rango</p>
-             <h3 className="text-3xl font-black text-white">Bronce</h3>
-           </div>
-        </div>
+
+        {/* Busca esta sección en tu código y reemplázala: */}
+<div className={`bg-[#1e1e1e] border p-6 rounded-xl flex items-center gap-4 transition-all duration-500 ${rank.glow}`}>
+   <Star className={`w-10 h-10 ${rank.color}`} />
+   <div>
+     <p className="text-gray-400 text-sm font-bold uppercase">Rango Actual</p>
+     <h3 className={`text-3xl font-black ${rank.color}`}>
+       {rank.name}
+     </h3>
+   </div>
+</div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
