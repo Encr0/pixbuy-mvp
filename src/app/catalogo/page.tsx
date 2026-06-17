@@ -25,15 +25,20 @@ export default async function CatalogoPage({
       { description: { contains: searchQuery, mode: "insensitive" } },
     ];
   }
-
   // 3. Prisma trae SOLO el bloque de juegos que necesitamos
   const products = await prisma.product.findMany({
-    where: whereClause,
-    include: { categories: true },
-    orderBy: { createdAt: "desc" },
-    skip: skip,
-    take: itemsPerPage,
-  });
+  where: {
+    categories: {
+      none: {
+        name: "Gift Cards"
+      }
+    }
+  },
+  include: {
+    keys: { where: { status: "AVAILABLE" } }
+  },
+  orderBy: { id: 'desc' }
+});
 
   // 4. Prisma cuenta el TOTAL de juegos para saber cuántas páginas dibujar
   const totalProducts = await prisma.product.count({ where: whereClause });

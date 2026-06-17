@@ -10,7 +10,6 @@ export default function AdminDashboard() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  // Estado del formulario
   const [formData, setFormData] = useState({
     title: "",
     description: "",

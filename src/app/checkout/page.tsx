@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useStore } from "@/context/StoreProvider";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CreditCard, ShieldCheck, Loader2, Gamepad2, AlertCircle } from "lucide-react";
+import { CreditCard, ShieldCheck, Loader2, Gamepad2, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useStore();
@@ -12,19 +12,10 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+
+  const [isSuccess, setIsSuccess] = useState(false);
   const totalCLP = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  // Si alguien entra a /checkout con el carrito vacío
-  if (cart.length === 0) {
-    return (
-      <main className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh]">
-        <AlertCircle className="w-20 h-20 text-yellow-500 mb-6" />
-        <h1 className="text-3xl font-black text-white mb-2">Checkout Inválido</h1>
-        <p className="text-gray-400 mb-6">No tienes productos para procesar.</p>
-        <Link href="/" className="bg-[#FF6600] px-8 py-3 rounded-full font-bold text-white">Volver a la Tienda</Link>
-      </main>
-    );
-  }
 
   const handlePayment = async () => {
     setLoading(true);
@@ -38,28 +29,55 @@ export default function CheckoutPage() {
       });
 
       if (res.status === 401) {
-        // Si no está logueado, lo mandamos a login y guardamos la ruta de vuelta
         router.push("/login?callbackUrl=/checkout");
         return;
       }
 
       if (!res.ok) throw new Error("Fallo al procesar el pago");
 
-      // ¡El pago fue exitoso! Vaciamos el carrito visual
-      clearCart();
+      setIsSuccess(true); 
+      clearCart(); // Ahora, aunque el carrito se vacíe, se mostrará la pantalla de éxito
       
-      // NUEVO: Refrescamos la memoria del navegador antes de viajar
       router.refresh(); 
-      
-      // Lo enviamos a su panel de control para que vea su compra
-      router.push("/dashboard");
+
+      // 3. Esperamos 2 segundos para que el usuario lea el mensaje antes de redirigirlo
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
 
 
     } catch (err) {
-      setError("Hubo un problema procesando tu transacción. Intenta nuevamente.");
+      setError("Hubo un problema con el pago o stock del producto. Intenta nuevamente mas tarde.");
       setLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh]">
+        <CheckCircle className="w-24 h-24 text-green-500 mb-6 animate-bounce" />
+        <h1 className="text-4xl font-black text-white mb-2">¡Pago Aprobado!</h1>
+        <p className="text-gray-400 text-lg flex items-center gap-2">
+          <Loader2 className="w-5 h-5 animate-spin text-[#FF6600]" /> 
+          Preparando tus juegos y redirigiendo a tu bóveda...
+        </p>
+      </main>
+    );
+  }
+
+  // Si alguien entra a /checkout con el carrito vacío (y no acaba de pagar)
+  if (cart.length === 0) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh]">
+        <AlertCircle className="w-20 h-20 text-yellow-500 mb-6" />
+        <h1 className="text-3xl font-black text-white mb-2">Checkout Inválido</h1>
+        <p className="text-gray-400 mb-6">No tienes productos para procesar.</p>
+        <Link href="/" className="bg-[#FF6600] px-8 py-3 rounded-full font-bold text-white hover:bg-[#e55c00] transition-colors">
+          Volver a la Tienda
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12">

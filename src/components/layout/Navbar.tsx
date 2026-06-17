@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, Heart, User, Search, Gamepad2 } from "lucide-react";
+import { ShoppingCart, Heart, User, Search, Gamepad2, CreditCard } from "lucide-react";
 import { useStore } from "@/context/StoreProvider";
 
 export default function Navbar() {
@@ -34,6 +34,22 @@ export default function Navbar() {
           </div>
           <span className="text-2xl font-black tracking-tight text-white">PIXBUY</span>
         </Link>
+        <Link 
+    href="/catalogo" 
+    className="flex items-center gap-2 text-gray-300 hover:text-[#FF6600] transition-colors font-bold text-sm uppercase tracking-wider"
+  >
+    <Gamepad2 className="w-5 h-5" />
+    <span>Catálogo</span>
+  </Link>
+
+  {/* Botón Gift Cards */}
+  <Link 
+    href="/giftcards" 
+    className="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-colors font-bold text-sm uppercase tracking-wider"
+  >
+    <CreditCard className="w-5 h-5" />
+    <span>Gift Cards</span>
+  </Link>
 
         {/* Buscador (Desktop) - Ahora es un formulario funcional */}
         <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8 relative">

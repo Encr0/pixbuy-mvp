@@ -1,79 +1,135 @@
-export const dynamic = "force-dynamic";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { Search, ShoppingCart, Gamepad2 } from "lucide-react";
-import { Terminal, ShieldCheck, Sparkles, Zap, Wrench, User, Github } from "lucide-react";
+import { 
+  Gamepad2, Terminal, ShieldCheck, Sparkles, Zap, Wrench, User, Github, Flame, Tent, ShoppingCart 
+} from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  // Ejecutamos las 3 consultas en paralelo para máxima velocidad
+  const [latestReleases, actionGames, survivalGames] = await Promise.all([
+    prisma.product.findMany({
+      take: 4,
+      orderBy: { id: 'desc' }, 
+      include: { keys: { where: { status: "AVAILABLE" } } }
+    }),
+    prisma.product.findMany({
+      take: 4,
+      where: { categories: { some: { name: "Acción" } } },
+      include: { keys: { where: { status: "AVAILABLE" } } }
+    }),
+    prisma.product.findMany({
+      take: 4,
+      where: { categories: { some: { name: "Supervivencia" } } },
+      include: { keys: { where: { status: "AVAILABLE" } } }
+    })
+  ]);
 
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-    take: 12 
-  });
+  // Función auxiliar para renderizar la cuadrícula de juegos (¡AHORA CLICKEABLE!)
+  const renderGameGrid = (games: any[]) => {
+    if (games.length === 0) return <p className="text-gray-500 py-4">No hay juegos en esta categoría aún.</p>;
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {games.map((game) => {
+          const stock = game.keys?.length || 0;
+          return (
+            <div key={game.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl overflow-hidden hover:border-[#FF6600] transition-colors group flex flex-col relative">
+              
+              {/* Envolvemos la Imagen y el Título en un Link para que TODO sea clickeable */}
+              <Link href={`/product/${game.id}`} className="flex flex-col flex-1">
+                <div className="aspect-[3/4] overflow-hidden relative bg-black">
+                  <img 
+                    src={game.coverImage} 
+                    alt={game.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-2 right-2 bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white z-10">
+                    {stock > 0 ? `${stock} disp.` : <span className="text-red-500">Agotado</span>}
+                  </div>
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="text-lg font-bold text-white mb-1 line-clamp-2 group-hover:text-[#FF6600] transition-colors">{game.title}</h3>
+                </div>
+              </Link>
+
+              {/* Contenedor de Precio y Carrito (Se mantiene en la parte inferior) */}
+              <div className="px-4 pb-4 mt-auto">
+                <div className="flex justify-between items-end pt-4 border-t border-[#2a2a2a]">
+                  <span className="text-xl font-black text-[#FF6600]">
+                    ${game.priceCLP.toLocaleString('es-CL')}
+                  </span>
+                  <Link 
+                    href={`/product/${game.id}`}
+                    className="bg-[#2a2a2a] hover:bg-[#FF6600] text-white p-2 rounded-lg transition-colors z-10"
+                    title="Ver producto"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12 space-y-16">
       
-      {/* SECCIÓN HERO (El cartel principal) */}
+      {/* =========================================
+          CARTEL DE LOGS (HERO SECTION) INTACTO
+      ========================================= */}
       <div className="bg-gradient-to-r from-[#FF6600]/20 to-[#121212] border border-[#FF6600]/30 rounded-2xl p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
-  
   <div className="max-w-2xl">
-    {/* Título */}
     <div className="flex items-center gap-4 mb-6">
       <Terminal className="w-10 h-10 md:w-14 md:h-14 text-[#FF6600]" />
       <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
-        LOGS: mes de junio 2026
+        LOGS: 17-06-2026
       </h1>
     </div>
 
-    {/* Lista estructurada en lugar del <p> con <br/> */}
     <ul className="space-y-4 mb-8 text-gray-300 text-lg md:text-xl">
       <li className="flex items-start gap-3">
         <ShieldCheck className="w-6 h-6 text-green-500 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Seguridad & Auth:</strong> Base de datos protegida, contraseñas hasheadas, autenticación JWT y roles diferenciados (Admin/Cliente).
+          <strong className="text-white">Backend & Emails:</strong> Integración de Nodemailer con API de Gmail. Envío de recibos dinámicos en HTML (Dark Mode) detallando juegos, cantidades y subtotales.
         </span>
       </li>
-
       <li className="flex items-start gap-3">
         <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Nuevos Sistemas:</strong> Panel de administración completo, carrito con persistencia en DB y pasarela de pago simulada.
+          <strong className="text-white">Nuevos Sistemas:</strong> Gamificación progresiva (Hierro a Gran Maestro) y sección independiente con filtrado exclusivo para Gift Cards.
         </span>
       </li>
-
       <li className="flex items-start gap-3">
         <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Interacción:</strong> Sistema de reseñas con moderación y búsqueda avanzada con filtros (plataforma, género, precio).
+          <strong className="text-white">UX & UI:</strong> Nuevo flujo de Checkout con pantalla transicional de éxito y rediseño del Home con tarjetas 100% interactivas por categorías.
         </span>
       </li>
-
       <li className="flex items-start gap-3">
         <Zap className="w-6 h-6 text-yellow-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Rendimiento:</strong> Optimización de consultas a la base de datos y uso de técnicas de caching.
+          <strong className="text-white">Rendimiento:</strong> Implementación de carga paralela (`Promise.all`) para optimizar tiempos de respuesta en la base de datos de Prisma.
         </span>
       </li>
-
       <li className="flex items-start gap-3">
         <Wrench className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Bug Fixes:</strong> Arreglo en el error de cálculo de precios; ahora los impuestos se muestran correctamente.
+          <strong className="text-white">Bug Fixes:</strong> Eliminación del "pantallazo" de error tras vaciar el carrito en compras exitosas y correcciones en la reactividad de precios.
         </span>
       </li>
     </ul>
 
-    {/* Firma */}
-    {/* Firma y Enlaces */}
     <div className="mt-8 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-[#FF6600] font-mono text-lg">
         <User className="w-5 h-5" />
         <span>Encr0 - lead developer</span>
       </div>
-      
-      {/* Reemplaza TU_USUARIO por tu nombre de usuario real en GitHub */}
       <a 
         href="https://github.com/Encr0" 
         target="_blank" 
@@ -86,80 +142,60 @@ export default async function HomePage() {
     </div>
   </div>
 
-  {/* Icono gigante de la derecha (Mantenido intacto) */}
   <div className="hidden md:flex opacity-80 shrink-0 ml-8">
     <Gamepad2 className="w-64 h-64 text-[#FF6600]/20" />
   </div>
-  
 </div>
 
-      {/* TÍTULO DE LA VITRINA */}
-      <div className="flex items-center justify-between mb-8 border-b border-[#2a2a2a] pb-4">
-        <h2 className="text-2xl md:text-3xl font-black text-white">Últimos Lanzamientos</h2>
-        <Link href="/catalogo" className="text-[#FF6600] font-bold hover:underline">
-          Ver todos
-        </Link>
-      </div>
 
-      {/* CUADRÍCULA DINÁMICA DE JUEGOS */}
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <div key={product.id} className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl overflow-hidden hover:border-[#FF6600] transition-all group hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#FF6600]/10 flex flex-col">
-              
-              {/* Imagen (Clicable) */}
-              <Link href={`/product/${product.id}`} className="aspect-[3/4] relative overflow-hidden block">
-                <img 
-                  src={product.coverImage} 
-                  alt={product.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur text-white text-xs font-bold px-2 py-1 rounded border border-[#2a2a2a]">
-                  {product.platforms[0]} {/* Muestra la primera plataforma, ej: Steam */}
-                </div>
-              </Link>
-              
-              {/* Info del Juego */}
-              <div className="p-5 flex flex-col flex-1 justify-between">
-                <div>
-                  <Link href={`/product/${product.id}`}>
-                    <h3 className="font-bold text-white text-lg line-clamp-1 hover:text-[#FF6600] transition-colors mb-1">
-                      {product.title}
-                    </h3>
-                  </Link>
-                  <p className="text-gray-400 text-xs mb-4 line-clamp-1">
-                    {product.publisher || "Digital"}
-                  </p>
-                </div>
-                
-                {/* Precio y Botón */}
-                <div className="flex items-end justify-between mt-auto">
-                  <div>
-                    <p className="text-xs text-gray-500 line-through mb-0.5">
-                      ${(product.priceCLP * 1.3).toLocaleString('es-CL')}
-                    </p>
-                    <span className="font-black text-white text-xl">
-                      ${product.priceCLP.toLocaleString('es-CL')}
-                    </span>
-                  </div>
-                  <button className="bg-[#2a2a2a] hover:bg-[#FF6600] p-3 rounded-lg transition-colors text-white">
-                    <ShoppingCart className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          ))}
+      {/* =========================================
+          SECCIÓN 1: ÚLTIMOS LANZAMIENTOS
+      ========================================= */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
+            <Gamepad2 className="w-8 h-8 text-[#FF6600]" />
+            Últimos Lanzamientos
+          </h2>
+          <Link href="/catalogo" className="text-[#FF6600] hover:text-white font-bold text-sm transition-colors">
+            Ver todo el catálogo &rarr;
+          </Link>
         </div>
-      ) : (
-        /* MENSAJE SI LA BASE DE DATOS ESTÁ VACÍA */
-        <div className="text-center py-20 bg-[#1e1e1e] rounded-xl border border-[#2a2a2a]">
-          <Gamepad2 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-400">El catálogo está vacío</h2>
-          <p className="text-gray-500 mt-2">Visita /api/seed para inyectar juegos de prueba.</p>
-        </div>
-      )}
+        {renderGameGrid(latestReleases)}
+      </section>
 
+      {/* =========================================
+          SECCIÓN 2: CATEGORÍA ACCIÓN
+      ========================================= */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
+            <Flame className="w-8 h-8 text-red-500" />
+            Acción Pura
+          </h2>
+          <Link href="/catalogo?categoria=accion" className="text-gray-400 hover:text-white font-bold text-sm transition-colors">
+            Ver más Acción &rarr;
+          </Link>
+        </div>
+        {renderGameGrid(actionGames)}
+      </section>
+
+      {/* =========================================
+          SECCIÓN 3: CATEGORÍA SUPERVIVENCIA
+      ========================================= */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl md:text-3xl font-black text-white flex items-center gap-3">
+            <Tent className="w-8 h-8 text-green-500" />
+            Supervivencia Extrema
+          </h2>
+          <Link href="/catalogo?categoria=supervivencia" className="text-gray-400 hover:text-white font-bold text-sm transition-colors">
+            Ver más Supervivencia &rarr;
+          </Link>
+        </div>
+        {renderGameGrid(survivalGames)}
+      </section>
+      
     </main>
   );
 }
