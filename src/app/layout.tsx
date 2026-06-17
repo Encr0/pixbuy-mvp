@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { StoreProvider } from "@/context/StoreProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Pixbuy | Tu Tienda de Game Keys",
@@ -61,6 +62,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <SpeedInsights />
         </StoreProvider>
       </body>
     </html>
