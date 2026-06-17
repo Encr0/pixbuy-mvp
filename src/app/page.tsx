@@ -120,7 +120,7 @@ export default async function HomePage() {
       <li className="flex items-start gap-3">
         <Wrench className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Bug Fixes:</strong> Eliminación del "pantallazo" de error tras vaciar el carrito en compras exitosas y correcciones en la reactividad de precios.
+          <strong className="text-white">Bug Fixes:</strong> Eliminación del &quot;pantallazo&quot; de error tras vaciar el carrito en compras exitosas y correcciones en la reactividad de precios.
         </span>
       </li>
     </ul>
