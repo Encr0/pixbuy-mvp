@@ -21,10 +21,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const { cart } = await req.json(); // Solo necesitamos el carrito, el total lo calculamos nosotros
+    const { cart } = await req.json();
 
-    // 1. RE-CALCULO DE SEGURIDAD: Buscamos el precio real de cada producto en tu BD
-    // Esto evita que un usuario modifique el precio desde el navegador
     let realTotal = 0;
     const productIds = cart.map((i: any) => i.productId);
     const dbProducts = await prisma.product.findMany({
@@ -166,7 +164,7 @@ export async function POST(req: Request) {
 
               <!-- Botón de Acción -->
               <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
-                <a href="http://localhost:3000/dashboard" style="background-color: #FF6600; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">
+                <a href="https://pixbuy-mvp.vercel.app/dashboard" style="background-color: #FF6600; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 1px;">
                   Revelar mis llaves
                 </a>
               </div>
