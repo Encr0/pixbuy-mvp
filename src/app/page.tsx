@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { 
-  Gamepad2, Terminal, ShieldCheck, Sparkles, Zap, Wrench, User, Github, Flame, Tent, ShoppingCart 
+  Gamepad2, Terminal, ShieldCheck, Sparkles, Zap, Wrench, User, Github, Flame, Tent, ShoppingCart, 
+  FileText
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -83,12 +84,12 @@ export default async function HomePage() {
       {/* =========================================
           CARTEL DE LOGS (HERO SECTION) INTACTO
       ========================================= */}
-      <div className="bg-gradient-to-r from-[#FF6600]/20 to-[#121212] border border-[#FF6600]/30 rounded-2xl p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
+<div className="bg-gradient-to-r from-[#FF6600]/20 to-[#121212] border border-[#FF6600]/30 rounded-2xl p-8 md:p-12 mb-12 flex flex-col md:flex-row items-center justify-between">
   <div className="max-w-2xl">
     <div className="flex items-center gap-4 mb-6">
       <Terminal className="w-10 h-10 md:w-14 md:h-14 text-[#FF6600]" />
       <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
-        LOGS: 17-06-2026
+        LOGS: 25-06-2026
       </h1>
     </div>
 
@@ -96,31 +97,31 @@ export default async function HomePage() {
       <li className="flex items-start gap-3">
         <ShieldCheck className="w-6 h-6 text-green-500 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Backend & Emails:</strong> Integración de Nodemailer con API de Gmail. Envío de recibos dinámicos en HTML (Dark Mode) detallando juegos, cantidades y subtotales.
+          <strong className="text-white">Seguridad y Auth:</strong> Flujo completo de recuperación de contraseñas con tokens criptográficos (`crypto`), expiración temporal y envío de enlaces mágicos vía Nodemailer.
         </span>
       </li>
       <li className="flex items-start gap-3">
         <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Nuevos Sistemas:</strong> Gamificación progresiva (Hierro a Gran Maestro) y sección independiente con filtrado exclusivo para Gift Cards.
+          <strong className="text-white">CRM & Soporte:</strong> Implementación de un sistema de Tickets relacional en PostgreSQL con notificaciones Push automáticas al correo del administrador.
         </span>
       </li>
       <li className="flex items-start gap-3">
-        <Sparkles className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
+        <FileText className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">UX & UI:</strong> Nuevo flujo de Checkout con pantalla transicional de éxito y rediseño del Home con tarjetas 100% interactivas por categorías.
+          <strong className="text-white">Legal & Compliance:</strong> Integración de apartados legales de e-commerce (Términos y Condiciones, Política de Privacidad) adaptados para la venta de bienes digitales.
         </span>
       </li>
       <li className="flex items-start gap-3">
         <Zap className="w-6 h-6 text-yellow-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Rendimiento:</strong> Implementación de carga paralela (`Promise.all`) para optimizar tiempos de respuesta en la base de datos de Prisma.
+          <strong className="text-white">UX & Rendimiento:</strong> Telemetría en vivo con Vercel Speed Insights, optimización de carga con `Promise.all` y sistema de Gamificación dinámica (PixPoints).
         </span>
       </li>
       <li className="flex items-start gap-3">
-        <Wrench className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
+        <Wrench className="w-6 h-6 text-gray-400 shrink-0 mt-1" />
         <span>
-          <strong className="text-white">Bug Fixes:</strong> Eliminación del &quot;pantallazo&quot; de error tras vaciar el carrito en compras exitosas y correcciones en la reactividad de precios.
+          <strong className="text-white">Build Release:</strong> Despliegue exitoso en producción (Vercel + Neon DB) solucionando conflictos de dependencias (`legacy-peer-deps`) y caché.
         </span>
       </li>
     </ul>

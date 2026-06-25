@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // Importación corregida de Next.js
 
 export default function LoginPage() {
   const router = useRouter();
@@ -93,6 +94,15 @@ export default function LoginPage() {
               placeholder="••••••••"
             />
           </div>
+          
+          {/* Mostramos el enlace SOLO si estamos en la vista de Iniciar Sesión */}
+          {isLogin && (
+            <div className="text-right mt-1">
+              <Link href="/recuperar-password" className="text-sm text-gray-400 hover:text-[#FF6600] transition-colors">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+          )}
           
           <button 
             type="submit" disabled={loading}

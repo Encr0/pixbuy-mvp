@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, Heart, User, Search, Gamepad2, CreditCard } from "lucide-react";
+import { ShoppingCart, Heart, User, Search, Gamepad2, CreditCard, LifeBuoy } from "lucide-react";
 import { useStore } from "@/context/StoreProvider";
 
 export default function Navbar() {
@@ -86,6 +86,11 @@ export default function Navbar() {
               </span>
             )}
           </Link>
+
+          <Link href="/soporte" className="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1">
+            <LifeBuoy className="w-4 h-4" />
+            <span>Soporte</span>
+            </Link>
 
           {/* Botón Mi Cuenta */}
           <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors flex flex-col items-center">

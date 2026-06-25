@@ -16,18 +16,18 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-bold mb-4">Plataformas</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="#" className="hover:text-pixorange">Steam</Link></li>
-              <li><Link href="#" className="hover:text-pixorange">Epic Games</Link></li>
-              <li><Link href="#" className="hover:text-pixorange">PlayStation Network</Link></li>
-              <li><Link href="#" className="hover:text-pixorange">Xbox Live</Link></li>
+              <li><Link href="/catalogo?plataforma=Steam" className="hover:text-pixorange">Steam</Link></li>
+              <li><Link href="/catalogo?plataforma=Epic+Games" className="hover:text-pixorange">Epic Games</Link></li>
+              <li><Link href="/catalogo?plataforma=PS5" className="hover:text-pixorange">PlayStation Network</Link></li>
+              <li><Link href="/catalogo?plataforma=XBOX" className="hover:text-pixorange">Xbox Live</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="text-white font-bold mb-4">Soporte</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="#" className="hover:text-pixorange">Centro de Asistencia</Link></li>
-              <li><Link href="#" className="hover:text-pixorange">Términos y Condiciones</Link></li>
-              <li><Link href="#" className="hover:text-pixorange">Política de Privacidad</Link></li>
+              <li><Link href="/soporte" className="hover:text-pixorange">Centro de Asistencia</Link></li>
+              <li><Link href="/terminos" className="hover:text-pixorange">Términos y Condiciones</Link></li>
+              <li><Link href="/privacidad" className="hover:text-pixorange">Política de Privacidad</Link></li>
             </ul>
           </div>
           <div>
