@@ -30,7 +30,7 @@ export default function TerminosPage() {
         <section>
           <h2 className="text-xl font-bold text-white mb-3">2. Política de Reembolsos y Devoluciones</h2>
           <p>
-            Debido a la naturaleza de los bienes digitales, <strong>todas las ventas son finales</strong>. Una vez que el usuario hace clic en "Revelar Llave" dentro de su Bóveda, el código se considera consumido y no será elegible para reembolso. 
+            Debido a la naturaleza de los bienes digitales, <strong>todas las ventas son finales</strong>. Una vez que el usuario hace clic en &quot;Revelar Llave&quot; dentro de su Bóveda, el código se considera consumido y no será elegible para reembolso. 
           </p>
           <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-400">
             <li>Solo se emitirán reembolsos si se demuestra mediante nuestro Soporte Técnico que la llave entregada era inválida o duplicada antes de la compra.</li>
